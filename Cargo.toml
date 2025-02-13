@@ -4,6 +4,15 @@ version = "0.1.0"
 description = "Mnemnk agent of API server"
 authors = ["Akira Ishino <akira@lumilab.jp>"]
 edition = "2021"
+readme = "README.md"
+repository = "https://github.com/mnemnk/mnemnk-api"
+license = "MIT"
+
+[[bin]]
+name = "mnemnk-api"
+path = "src/main.rs"
+test = false
+bench = false
 
 [dependencies]
 anyhow = "1.0.95"

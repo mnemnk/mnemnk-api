@@ -189,19 +189,3 @@ fn get_config(config: &AgentConfig, _args: &str) -> Result<()> {
     println!("CONFIG {}", serde_json::to_string(config)?);
     Ok(())
 }
-
-// async fn execute_task(_config: &AgentConfig) -> Result<()> {
-//     let win_info = check_application().await;
-
-//     if win_info.is_none() {
-//         return Ok(());
-//     }
-
-//     if let Some(win_info) = win_info {
-//         // debug!("check_application: {:?}", win_info);
-//         let win_info_json = serde_json::to_string(&win_info)?;
-//         println!("STORE {} {}", KIND, win_info_json);
-//     }
-
-//     Ok(())
-// }
