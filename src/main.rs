@@ -6,6 +6,7 @@ use axum_auth::AuthBearer;
 use base64::{engine::general_purpose, Engine as _};
 use clap::Parser;
 use rand::Rng;
+use schemars::{schema_for, JsonSchema};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use tokio::io::{stdin, AsyncBufReadExt, BufReader};
@@ -15,9 +16,15 @@ use tower_http::timeout::TimeoutLayer;
 
 const AGENT_NAME: &str = "mnemnk-api";
 
-#[derive(Clone, Debug, serde::Deserialize, serde::Serialize)]
+/// # API
+/// API server
+#[derive(Clone, Debug, serde::Deserialize, serde::Serialize, JsonSchema)]
 struct AgentConfig {
+    /// # Address
+    /// API server address (host:port)
     address: String,
+
+    /// # API Key
     api_key: Option<String>,
 }
 
@@ -39,6 +46,9 @@ pub struct Args {
 #[tokio::main]
 async fn main() -> Result<()> {
     env_logger::init();
+
+    let schema = schema_for!(AgentConfig);
+    println!("CONFIG_SCHEMA {}", serde_json::to_string(&schema)?);
 
     let args = Args::parse();
 
