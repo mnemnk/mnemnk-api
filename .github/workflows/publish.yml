@@ -39,6 +39,8 @@ jobs:
         run: cargo build --verbose --locked --release --target ${{ matrix.target }}
  
       - name: rename binary
+        env:
+          GITHUB_REF_NAME: ${{ github.ref_name }}
         shell: bash
         run: |
           BIN_SUFFIX=""
@@ -52,7 +54,7 @@ jobs:
  
           # Define a better name for the final binary
           BIN_RELEASE="${PROJECT_NAME}-${{ matrix.name }}${BIN_SUFFIX}"
-          BIN_RELEASE_VERSIONED="${PROJECT_NAME}-${{ github.ref_name }}-${{ matrix.name }}${BIN_SUFFIX}"
+          BIN_RELEASE_VERSIONED="${PROJECT_NAME}-${GITHUB_REF_NAME}-${{ matrix.name }}${BIN_SUFFIX}"
  
           # Rename the built binary
           mv "${BIN_OUTPUT}" "${BIN_OUTPUT_DIR}/${BIN_RELEASE_VERSIONED}"
