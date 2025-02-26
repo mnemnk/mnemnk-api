@@ -60,8 +60,10 @@ jobs:
           echo "BIN_RELEASE_FILE=${BIN_OUTPUT_DIR}/${BIN_RELEASE_VERSIONED}" >> $GITHUB_ENV
     
       - name: release binary
-        shell: bash
+        uses: softprops/action-gh-release@v2
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-            gh release create ${{ github.ref_name }} --draft $BIN_RELEASE_FILE
+            BIN_RELEASE_FILE: ${{ env.BIN_RELEASE_FILE }}
+        with:
+          draft: true
+          files: ${{ env.BIN_RELEASE_FILE }}
