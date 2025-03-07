@@ -48,7 +48,7 @@ async fn main() -> Result<()> {
     env_logger::init();
 
     let schema = schema_for!(AgentConfig);
-    println!("CONFIG_SCHEMA {}", serde_json::to_string(&schema)?);
+    println!(".CONFIG_SCHEMA {}", serde_json::to_string(&schema)?);
 
     let args = Args::parse();
 
@@ -67,7 +67,7 @@ async fn main() -> Result<()> {
         config.api_key = Some(generate_api_key());
     }
 
-    println!("CONFIG {}", serde_json::to_string(&config)?);
+    println!(".CONFIG {}", serde_json::to_string(&config)?);
 
     log::info!("Starting {}.", AGENT_NAME);
 
@@ -153,7 +153,7 @@ async fn store(
     }
     let json_value = serde_json::to_string(&request.value).map_err(|e| e.to_string())?;
     // TODO: store agent into metadata
-    println!("STORE {} {}", request.kind, json_value);
+    println!(".STORE {} {}", request.kind, json_value);
     Ok(Json(json!({"status": "ok"})))
 }
 
@@ -162,11 +162,11 @@ async fn process_line(config: &AgentConfig, line: &str) -> Result<()> {
 
     if let Some((cmd, args)) = parse_line(line) {
         match cmd {
-            "GET_CONFIG" => {
+            ".GET_CONFIG" => {
                 get_config(config, args)?;
             }
-            "QUIT" => {
-                log::info!("QUIT {}.", AGENT_NAME);
+            ".QUIT" => {
+                log::info!("Quit {}.", AGENT_NAME);
                 // TODO: send message to server
                 std::process::exit(0);
             }
@@ -196,6 +196,6 @@ fn parse_line(line: &str) -> Option<(&str, &str)> {
 }
 
 fn get_config(config: &AgentConfig, _args: &str) -> Result<()> {
-    println!("CONFIG {}", serde_json::to_string(config)?);
+    println!(".CONFIG {}", serde_json::to_string(config)?);
     Ok(())
 }
