@@ -1,6 +1,6 @@
 [package]
 name = "mnemnk-api"
-version = "0.1.1"
+version = "0.2.0"
 description = "Mnemnk agent of API server"
 authors = ["Akira Ishino <akira@lumilab.jp>"]
 edition = "2021"
