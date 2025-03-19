@@ -3,10 +3,7 @@ use std::time::Duration;
 use anyhow::Result;
 use axum::{extract::State, routing::post, Json, Router};
 use axum_auth::AuthBearer;
-use base64::{engine::general_purpose, Engine as _};
 use clap::Parser;
-use rand::Rng;
-use schemars::{schema_for, JsonSchema};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use tokio::io::{stdin, AsyncBufReadExt, BufReader};
@@ -16,15 +13,9 @@ use tower_http::timeout::TimeoutLayer;
 
 const AGENT_NAME: &str = "mnemnk-api";
 
-/// # API
-/// API server
-#[derive(Clone, Debug, serde::Deserialize, serde::Serialize, JsonSchema)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 struct AgentConfig {
-    /// # Address
-    /// API server address (host:port)
     address: String,
-
-    /// # API Key
     api_key: Option<String>,
 }
 
@@ -34,6 +25,21 @@ impl Default for AgentConfig {
             address: "localhost:3296".to_string(),
             api_key: None,
         }
+    }
+}
+
+impl From<&str> for AgentConfig {
+    fn from(s: &str) -> Self {
+        let mut config = AgentConfig::default();
+        if let Value::Object(c) = serde_json::from_str(s).unwrap_or(Value::Null) {
+            if let Some(address) = c.get("address") {
+                config.address = address.as_str().unwrap().to_string();
+            }
+            if let Some(api_key) = c.get("api_key") {
+                config.api_key = Some(api_key.as_str().unwrap().to_string());
+            }
+        }
+        config
     }
 }
 
@@ -47,27 +53,9 @@ pub struct Args {
 async fn main() -> Result<()> {
     env_logger::init();
 
-    let schema = schema_for!(AgentConfig);
-    println!(".CONFIG_SCHEMA {}", serde_json::to_string(&schema)?);
-
     let args = Args::parse();
 
-    let mut config = AgentConfig::default();
-    if let Some(c) = &args.config {
-        if let Value::Object(c) = serde_json::from_str(c)? {
-            if let Some(address) = c.get("address") {
-                config.address = address.as_str().unwrap().to_string();
-            }
-            if let Some(api_key) = c.get("api_key") {
-                config.api_key = Some(api_key.as_str().unwrap().to_string());
-            }
-        }
-    }
-    if config.api_key.is_none() {
-        config.api_key = Some(generate_api_key());
-    }
-
-    println!(".CONFIG {}", serde_json::to_string(&config)?);
+    let mut config: AgentConfig = args.config.as_deref().unwrap_or_default().into();
 
     log::info!("Starting {}.", AGENT_NAME);
 
@@ -82,19 +70,13 @@ async fn main() -> Result<()> {
         tokio::select! {
             // Read from stdin
             _ = reader.read_line(&mut line) => {
-                if let Err(e) = process_line(&config, &line).await {
+                if let Err(e) = process_line(&mut config, &line).await {
                     log::error!("Failed to process line: {}", e);
                 }
                 line.clear();
             }
         }
     }
-}
-
-fn generate_api_key() -> String {
-    let mut bytes = [0u8; 32]; // 256bit
-    rand::rng().fill(&mut bytes);
-    general_purpose::URL_SAFE_NO_PAD.encode(&bytes)
 }
 
 async fn start_server(config: &AgentConfig) {
@@ -153,17 +135,21 @@ async fn store(
     }
     let json_value = serde_json::to_string(&request.value).map_err(|e| e.to_string())?;
     // TODO: store agent into metadata
-    println!(".STORE {} {}", request.kind, json_value);
+    println!(".OUT {} {}", request.kind, json_value);
     Ok(Json(json!({"status": "ok"})))
 }
 
-async fn process_line(config: &AgentConfig, line: &str) -> Result<()> {
+async fn process_line(config: &mut AgentConfig, line: &str) -> Result<()> {
     log::debug!("process_line: {}", line);
 
     if let Some((cmd, args)) = parse_line(line) {
         match cmd {
-            ".GET_CONFIG" => {
-                get_config(config, args)?;
+            ".CONFIG" => {
+                let new_config = AgentConfig::from(args);
+                log::info!("Config updated: {:?}", new_config);
+                *config = new_config;
+                // TODO: restart server
+                log::warn!("mnemnk-api does not support dynamic config change yet.");
             }
             ".QUIT" => {
                 log::info!("Quit {}.", AGENT_NAME);
@@ -193,9 +179,4 @@ fn parse_line(line: &str) -> Option<(&str, &str)> {
     } else {
         Some((line, ""))
     }
-}
-
-fn get_config(config: &AgentConfig, _args: &str) -> Result<()> {
-    println!(".CONFIG {}", serde_json::to_string(config)?);
-    Ok(())
 }
