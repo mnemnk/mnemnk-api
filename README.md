@@ -4,34 +4,11 @@
 
 ## Installation
 
-```shell
-cargo install mnemnk-api
-```
+1. Create a directory named `mnemnk-api` under `${mnemnk_dir}/agents/`. `${mnemnk_dir}` is the directory specified in the Mnemnk App settings, and the `agents` directory should already be automatically created.
+2. Download the binary from the release page and place it under the newly created `mnemnk-api` directory. When doing so, remove the suffix like `-v0.3.0-macos-arm64` or `-v0.3.0-win-amd64` from the file name, and rename it to `mnemnk-api` for mac or `mnemnk-api.exe` for Windows.
+3. Download `mnemnk.json`, and place it in the same `mnemnk-api` directory.
 
-## Setup
-
-`mnemnk-api` is enabled by default. After installation, restart Mnemnk and it should be running.
-
-If it is not enabled, please edit Settings in Mnemnk as follows
-
-```json
-  "agents": {
-    "api": {
-      "enabled": true
-    },
-    ...
-```
-
-Save the settings and restart Mnemnk.
-
-## Development
-
-```shell
-> cargo run
-...
-```
-
-You can stop `mnemnk-api` by entering QUIT.
+After installation, restart Mnemnk and `API` should be appear in Agents page.
 
 ## License
 
