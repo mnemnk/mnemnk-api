@@ -135,6 +135,12 @@ async fn store(
     }
     let json_value = serde_json::to_string(&request.value).map_err(|e| e.to_string())?;
     // TODO: store agent into metadata
+    if request.kind.is_empty() {
+        return Err("Kind is empty".to_string());
+    }
+    if request.value.is_null() {
+        return Err("Value is null".to_string());
+    }
     println!(".OUT {} {}", request.kind, json_value);
     Ok(Json(json!({"status": "ok"})))
 }
