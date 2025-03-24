@@ -1,20 +1,28 @@
 {
-    "name": "mnemnk-api",
-    "title": "API",
-    "description": "API server",
-    "outputs": ["*"],
-    "default_config": {
-            "address": {
-                "value": "localhost:3296",
-                "type": "string",
-                "title": "Address",
-                "description": "API server address (host:port)"
+    "agents": [
+        {
+            "kind": "Command",
+            "name": "mnemnk-api",
+            "title": "API",
+            "description": "API server",
+            "command": {
+                "cmd": "./target/release/mnemnk-api"
             },
-            "api_key": {
-                "value": null,
-                "type": "string?",
-                "title": "API Key",
-                "description": "API key"
+            "outputs": ["*"],
+            "default_config": {
+                    "address": {
+                        "value": "localhost:3296",
+                        "type": "string",
+                        "title": "Address",
+                        "description": "API server address (host:port)"
+                    },
+                    "api_key": {
+                        "value": null,
+                        "type": "string?",
+                        "title": "API Key",
+                        "description": "API key"
+                    }
             }
-    }
+        }
+    ]
 }
